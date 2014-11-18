@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drink Responsible App</title>
+<!--
+    WHAT THIS APP DOES: 
+-->  
+    
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0;" />
+    
+    <link rel="stylesheet" type="text/css" href="appframework/af.ui.css" />
+    <link rel="stylesheet" type="text/css" href="appframework/icons.css" />
+    <link rel="stylesheet" type="text/css" href="./css/main.css" />
+    
+    <script type="text/javascript" charset="utf-8" src="appframework/appframework.ui.min.js"></script>
+    <!--AppFramework plugin for sliding side menu-->
+    <script type="text/javascript" charset="utf-8" src="appframework/plugins/af.slidemenu.js"></script>
+    
+    <!--Scripts to use Jquery-->
+    <script src="./js/jquery-2.0.3.min.js"></script>
+    <script src="./js/af.ui.jquery.min.js"></script>
+    <script src="./js/jq.appframework.js"></script>
+
+    <!-- phantom library, needed for XDK "legacy" container api calls -->
+    <script src="intelxdk.js"></script>
+    <!-- phantom library, needed for Cordova api calls -->
+    <script src="cordova.js"></script>
+    <!-- phantom library, needed for XDK "legacy" container CORS -->
+    <script src="xhr.js"></script>
+    
+    <script>
+        var onDeviceReady=function(){                             // called when Cordova is ready
+           if( window.Cordova && navigator.splashscreen ) {     // Cordova API detected
+               $.ui.launch(); 
+               navigator.splashscreen.hide() ;                 // hide splash screen
+            }
+        } ;
+        document.addEventListener("deviceready", onDeviceReady, false) ;
+    </script>
+    
+    <script>   
+        $.ui.autoLaunch = false;
+        $.ui.animateHeaders = false;
+                
+        $(document).ready(function(){
+            $.ui.setSideMenuWidth('260px');
+            $.ui.launch();
+        });
+    </script>
+    
+    
+    <!--Blood Alcohol Math Stuff-->
+    <script> 
+        var clicks = 0; 
+        var beerclicks = 0;
+        var maltclicks = 0;
+        var wineclicks = 0;
+        var brandyclicks = 0;
+        var spiritclicks = 0;
+//        function myFunction() {
+//            clicks += 1; 
+//            document.getElementById("numberofdrinks").innerHTML = clicks;
+//        } 
+        
+        
+        
+        function resetFunction() {
+            clicks = 0;    
+            beerclicks = 0;
+            maltclicks = 0;
+            wineclicks = 0;
+            brandyclicks = 0;
+            spiritclicks = 0;
+            document.getElementById("numberofdrinks").innerHTML = clicks;
+            document.getElementById("beernum").innerHTML = beerclicks;
+            document.getElementById("maltnum").innerHTML = maltclicks;
+            document.getElementById("winenum").innerHTML = wineclicks;
+            document.getElementById("brandynum").innerHTML = brandyclicks;
+            document.getElementById("spititnum").innerHTML = spiritclicks;
+        }
+        
+        function beercount() {
+            beerclicks += 1; 
+            document.getElementById("beernum").innerHTML = beerclicks;
+        }
+        
+        function maltcount() {
+            maltclicks += 1; 
+            document.getElementById("maltnum").innerHTML = maltclicks;
+        }
+        
+        function winecount() {
+            wineclicks += 1; 
+            document.getElementById("winenum").innerHTML = wineclicks;
+        }
+        
+        function brandycount() {
+            brandyclicks += 1; 
+            document.getElementById("brandynum").innerHTML = brandyclicks;
+        }
+        
+        function spiritcount() {
+            spiritclicks += 1; 
+            document.getElementById("spititnum").innerHTML = spiritclicks;
+        }
+        
+        
+    </script> 
+    
+   
+    
+    <script> 
+        $(document).ready(function(){ 
+            var sum = 0;
+            
+            $(".grid-photo-box").click(function() { 
+                
+                if ( $( this ).hasClass("beer")) {
+                    sum = sum + .05;
+                } else if ($( this ).hasClass("malt")) {
+                    sum = sum + .07;
+                } else if($( this ).hasClass("wine")) {
+                    sum = sum + .12;
+                } else if ($( this ).hasClass("brandy")) {
+                    sum = sum + .40;
+                } else if ($( this ).hasClass("spirits")) {
+                    sum = sum + .40;
+                } else {
+                    alert("You broke something.");
+                }
+                
+                
+                //BAC = (Standard Drinks * 0.06 * 100 * 1.055 / Weight * .615) - (0.015) 
+                var weights = localStorage.getItem("userInput");
+               
+                //console.log(weights);
+                
+                if (weights==null || weights==[]) {
+                    alert("Please set your profile.");
+                } else {
+                    stringWeight = JSON.parse(weights).weight;
+                    
+                    userWeight = parseFloat(stringWeight);
+                }
+                
+                //console.log(userWeight);
+                
+                var BAC = (sum * 0.06 * 100 * 1.055 / userWeight * .615) - (0.015);
+                
+                document.getElementById("numberofdrinks").innerHTML = BAC.toFixed(2);
+                
+                if (BAC > .08) {
+                    alert("You have drunk too much for today.");
+                }
+                
+            });
+            
+        });          
+    </script>
+    
+    //<!--    Save profile form-->
+    <script>
+        function save() { 
+            confirm("Profile settings saved.");
+            
+            var userData = {
+                weight: $("#weight").val()
+            };
+
+            localStorage.setItem("userInput", JSON.stringify(userData));
+        } 
+    </script> 
+    
+    <style>       
+        /* CSS responsive square grid */        
+        .grid-photo {margin:3px -7px;} 
+        .grid-photo:after {content:'';display:block;clear:both;}        
+        .grid-photo li {position: relative; display:block; float:left; width: 10%; padding-bottom: 10%;}
+        .grid-photo .grid-photo-box {position: absolute;left: 3px;right: 3px;top: 3px;bottom: 3px; background-color: rgba(128,128,128,0.2);} 
+        .grid-photo img {width:100%;height:100%}
+        @media only screen and (max-width : 1024px) {
+            .grid-photo li {width: 12.5%; padding-bottom: 12.5%;}        
+        }        
+        @media only screen and (max-width : 768px) {
+            .grid-photo li {width: 16.6%; padding-bottom: 16.6%;}        
+        }        
+        @media only screen and (max-width : 480px) {
+            .grid-photo li {width: 25%; padding-bottom: 25%;}        
+        }
+        @media only screen and (max-width : 320px) {
+            .grid-photo li {width: 33.3%; padding-bottom: 33.3%;}        
+        }   
+    </style>
+
+</head>
+<body> 
+<div id="afui">
+    
+    <!--Left Side Menu Navigation bar -->
+    <nav>
+        <ul class="list">
+            <li><a href="#page1" class="icon home">Main</a></li>
+            <li><a href="#page4" class="icon user">Profile</a></li>
+            <li><a href="#page5" class="icon info">Info</a></li>
+            <li><a href="#page9" class="icon bug">The Hackers</a></li>
+        </ul>
+    </nav>
+    
+    <div id="content" style=""> 
+        
+    <!--Main View Pages-->
+        <div class="panel" title="Home" id="page1" selected="true">
+            <header>
+                <a id="menubadge" onclick='$.ui.toggleSideMenu()' class='menuButton' style="float:left !important"></a>
+            <h1>Drink Responsible Main</h1>
+            </header>
+            
+            <!--Grid View Page-->
+        
+            <div class="grid-photo">
+                <li><div class="grid-photo-box beer" onClick="beercount()" ><a href="#item1">
+                <img src="http://rethinkingdrinking.niaaa.nih.gov/images/graphic_beer.jpg" height="70" width="40"/></a></div></li><li>Beer: <p id="beernum">0</p> </li>
+                
+                <li><div class="grid-photo-box malt" onClick="maltcount()" ><a href="#item2">
+                <img src="http://rethinkingdrinking.niaaa.nih.gov/images/graphic_maltliquor.jpg" height="70" width="40"/></a></div></li><li>Malt: <p id="maltnum">0</p> </li>
+                
+                <li><div class="grid-photo-box wine" onClick="winecount()" ><a href="#item3">
+                <img src="http://rethinkingdrinking.niaaa.nih.gov/images/graphic_tablewine.jpg" height="70" width="40"/></a></div></li><li>Wine: <p id="winenum">0</p> </li>
+                
+                <li><div class="grid-photo-box brandy" onClick="brandycount()" ><a href="#item4">
+                <img src="http://rethinkingdrinking.niaaa.nih.gov/images/graphic_brandy.jpg" height="70" width="40"/></a></div></li><li>Brandy: <p id="brandynum">0</p> </li>
+                
+                <li><div class="grid-photo-box spirits" onClick="spiritcount()" ><a href="#item5">
+                <img src="http://rethinkingdrinking.niaaa.nih.gov/images/graphic_spirits.jpg" height="70" width="40"/></a></div></li><li>Spirits: <p id="spiritnum">0</p> </li>
+                                
+        
+            </div>
+            
+            <div>
+                <br> <button type="button" onclick="resetFunction()">Reset</button>
+            </div>
+            
+            <footer> 
+<!--                This should end up displaying the final number of drink that would set the alert off.-->
+                <h4>Approximate blood alcohol content: <p id="numberofdrinks">0</p> </h4>
+            </footer>
+            
+        </div>
+        
+<!--        Profile Page -->
+        <div class="panel" title="Profile" id="page4" data-footer="none">
+            <header>
+                <a id="menubadge" onclick='$.ui.toggleSideMenu()' class='menuButton' style="float:left !important"></a>
+                <h1>Profile</h1>
+            </header>
+            
+            <form name="userinfo">
+                Name:<br>
+                <input type="text">
+                <br>
+                Height (Inches):<br>
+                <input type="number" name="height" id="height">
+                <br>
+                Weight (Pounds): <br>
+                <input type="number" name="weight" id="weight">
+                <br>
+                Age:<br>
+                <input type="number" name="age" id="age">
+                <br>
+                <input type="button" onClick="save();" value="Save">
+                
+            </form>
+            
+                        
+        </div>
+        
+        <!--        Profile Page -->
+        <div class="panel" title="Profile" id="page5" data-footer="none">
+            <header>
+                <a id="menubadge" onclick='$.ui.toggleSideMenu()' class='menuButton' style="float:left !important"></a>
+                <h1>Info</h1>
+            </header>
+            
+            <h2>What's a "standard" drink?</h2>
+            <p>Information from <a href="http://rethinkingdrinking.niaaa.nih.gov/whatcountsdrink/whatsastandarddrink.asp">Rethinking Drinking:</a></p>
+            <p>A "standard" drink is any drink that contains about 0.6 fluid ounces or 14 grams of "pure" alcohol. Although the drinks below are different sizes, each contains approximately the same amount of alcohol and counts as a single standard drink.</p>
+            
+            <ul>
+                <li>12 fl oz of regular beer =</li>
+                <li>8-9 fl oz of malt liquor =</li>
+                <li>5 fl oz of table wine =</li>
+                <li>1.5 oz of brandy =</li>
+                <li>1.5 fl oz shot of 80-proof spirits ("hard liquor")</li>
+            </ul>
+            <br>
+            <h3>Campus Resources</h3>
+            <p><b>Campus Safety:</b> (909) 607-2000 </p>
+            
+        </div>
+        
+        <!--        Hacker Bio Page -->
+        <div class="panel" title="Profile" id="page9" data-footer="none">
+            <header>
+                <a id="menubadge" onclick='$.ui.toggleSideMenu()' class='menuButton' style="float:left !important"></a>
+                <h1>Hacker Bios</h1>
+            </header>
+            
+            <h1>Chinasa Okolo</h1>
+            <h4>Class of '18, STS Major</h4>
+            <br>
+            <h1>Liana Piedra</h1>
+            <h4>Class of '14, Molecular Biology Major, CS Minor</h4>
+            <br>
+            <h1>Somto Uzoegwu</h1>
+            <h4>Class of '18</h4>
+            <br>
+            <h1>Edwin Villafane</h1>
+            <h4>Class of '18</h4>
+            
+        </div>
+        
+    </div>
+</div>
+</body>
+</html>    
